@@ -19,14 +19,16 @@ for (const [source, destination] of recovered) {
   }
 
   if (destination === 'app/api/portal/[...path]/route.ts') {
-    const getNeedle = 'export async function GET(request:NextRequest,ctx:Params){try{';
-    const postNeedle = 'export async function POST(request:NextRequest,ctx:Params){try{';
-    if (!content.includes(getNeedle) || !content.includes(postNeedle)) {
-      throw new Error('Recovered portal route shape changed; compatibility hooks could not be installed safely');
+    const getPattern = /export\s+async\s+function\s+GET\s*\(\s*request\s*:\s*NextRequest\s*,\s*ctx\s*:\s*Params\s*\)\s*\{\s*try\s*\{/;
+    const postPattern = /export\s+async\s+function\s+POST\s*\(\s*request\s*:\s*NextRequest\s*,\s*ctx\s*:\s*Params\s*\)\s*\{\s*try\s*\{/;
+    if (!getPattern.test(content) || !postPattern.test(content)) {
+      const getAt = content.indexOf('function GET');
+      const postAt = content.indexOf('function POST');
+      throw new Error(`Recovered portal route shape changed; GET@${getAt} POST@${postAt}`);
     }
     content = `import { handleExtendedGET, handleExtendedPOST } from '@/lib/portalExtended';\nimport { handleExtendedDetailsGET, handleExtendedDetailsPOST } from '@/lib/portalExtendedDetails';\n${content}`
-      .replace(getNeedle, `${getNeedle}const __path=await p(ctx);const __extended=await handleExtendedGET(__path,request);if(__extended)return __extended;const __details=await handleExtendedDetailsGET(__path,request);if(__details)return __details;`)
-      .replace(postNeedle, `${postNeedle}const __path=await p(ctx);const __extended=await handleExtendedPOST(__path,request);if(__extended)return __extended;const __details=await handleExtendedDetailsPOST(__path,request);if(__details)return __details;`);
+      .replace(getPattern, match => `${match}const __path=await p(ctx);const __extended=await handleExtendedGET(__path,request);if(__extended)return __extended;const __details=await handleExtendedDetailsGET(__path,request);if(__details)return __details;`)
+      .replace(postPattern, match => `${match}const __path=await p(ctx);const __extended=await handleExtendedPOST(__path,request);if(__extended)return __extended;const __details=await handleExtendedDetailsPOST(__path,request);if(__details)return __details;`);
   }
 
   await mkdir(dirname(destination), { recursive: true });
