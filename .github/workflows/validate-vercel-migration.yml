@@ -38,6 +38,10 @@ jobs:
             echo "Floot-only runtime imports remain in the Vercel migration" >&2
             exit 1
           fi
+          if grep -R -E "(/_api/|/_cdn/|\.floot\.app)" app components lib; then
+            echo "Floot-only runtime URLs remain in the Vercel migration" >&2
+            exit 1
+          fi
           echo "Portal route handlers:"
           grep -oE "path===['\"][^'\"]+['\"]" app/api/portal/'[...path]'/route.ts | sort -u || true
       - name: Typecheck
