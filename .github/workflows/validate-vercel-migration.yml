@@ -44,6 +44,8 @@ jobs:
           fi
           echo "Portal route handlers:"
           grep -oE "path===['\"][^'\"]+['\"]" app/api/portal/'[...path]'/route.ts | sort -u || true
+          echo "Migrated UI live-transport references:"
+          grep -niE "realtime|presence|push|engagement-messages|messages" components/CyberSEApp.tsx | head -80 || true
       - name: Typecheck
         run: npm run typecheck
       - name: Production build
