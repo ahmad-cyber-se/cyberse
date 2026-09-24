@@ -28,10 +28,18 @@ jobs:
           cache-dependency-path: package.json
       - name: Install dependencies
         run: npm install --no-audit --no-fund
-      - name: Inspect recovered source
+      - name: Audit migration surface
         run: |
           node scripts/materialize-migration.mjs
-          nl -ba components/CyberSEApp.tsx | sed -n '70,90p'
+          test -s components/CyberSEApp.tsx
+          test -s app/api/portal/'[...path]'/route.ts
+          test -s app/globals.css
+          if grep -R "@floot/" app components lib; then
+            echo "Floot-only runtime imports remain in the Vercel migration" >&2
+            exit 1
+          fi
+          echo "Portal route handlers:"
+          grep -oE "path===['\"][^'\"]+['\"]" app/api/portal/'[...path]'/route.ts | sort -u || true
       - name: Typecheck
         run: npm run typecheck
       - name: Production build
