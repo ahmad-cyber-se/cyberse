@@ -10,7 +10,14 @@ const recovered = [
 
 for (const [source, destination] of recovered) {
   const encoded = (await readFile(source, 'utf8')).trim();
-  const content = gunzipSync(Buffer.from(encoded, 'base64'));
+  let content = gunzipSync(Buffer.from(encoded, 'base64')).toString('utf8');
+
+  if (destination === 'components/CyberSEApp.tsx') {
+    content = content
+      .replace('React.useEffect(load,[]);', 'React.useEffect(()=>{void load()},[]);')
+      .replace('React.useEffect(load,[kind]);', 'React.useEffect(()=>{void load()},[kind]);');
+  }
+
   await mkdir(dirname(destination), { recursive: true });
   await writeFile(destination, content);
   console.log(`Recovered ${destination}`);
