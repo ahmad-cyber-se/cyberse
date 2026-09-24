@@ -35,15 +35,12 @@ jobs:
             echo "available=false" >> "$GITHUB_OUTPUT"
             echo "VERCEL_TOKEN is not configured; deployment is safely skipped."
           fi
-      - name: Install dependencies
+      - name: Link known Vercel project
         if: steps.credentials.outputs.available == 'true'
-        run: npm install --no-audit --no-fund
-      - name: Pull Vercel production configuration
+        run: |
+          rm -rf .vercel
+          mkdir -p .vercel
+          printf '{"orgId":"%s","projectId":"%s"}\n' "$VERCEL_ORG_ID" "$VERCEL_PROJECT_ID" > .vercel/project.json
+      - name: Deploy source directly to Vercel
         if: steps.credentials.outputs.available == 'true'
-        run: npx --yes vercel@latest pull --yes --environment=production --token="$VERCEL_TOKEN"
-      - name: Build with Vercel
-        if: steps.credentials.outputs.available == 'true'
-        run: npx --yes vercel@latest build --prod --token="$VERCEL_TOKEN"
-      - name: Deploy prebuilt production bundle
-        if: steps.credentials.outputs.available == 'true'
-        run: npx --yes vercel@latest deploy --prebuilt --prod --token="$VERCEL_TOKEN"
+        run: npx --yes vercel@latest deploy --prod --yes --token="$VERCEL_TOKEN"
