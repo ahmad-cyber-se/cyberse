@@ -24,9 +24,9 @@ for (const [source, destination] of recovered) {
     if (!content.includes(getNeedle) || !content.includes(postNeedle)) {
       throw new Error('Recovered portal route shape changed; compatibility hooks could not be installed safely');
     }
-    content = `import { handleExtendedGET, handleExtendedPOST } from '@/lib/portalExtended';\n${content}`
-      .replace(getNeedle, `${getNeedle}const __path=await p(ctx);const __extended=await handleExtendedGET(__path,request);if(__extended)return __extended;`)
-      .replace(postNeedle, `${postNeedle}const __path=await p(ctx);const __extended=await handleExtendedPOST(__path,request);if(__extended)return __extended;`);
+    content = `import { handleExtendedGET, handleExtendedPOST } from '@/lib/portalExtended';\nimport { handleExtendedDetailsGET, handleExtendedDetailsPOST } from '@/lib/portalExtendedDetails';\n${content}`
+      .replace(getNeedle, `${getNeedle}const __path=await p(ctx);const __extended=await handleExtendedGET(__path,request);if(__extended)return __extended;const __details=await handleExtendedDetailsGET(__path,request);if(__details)return __details;`)
+      .replace(postNeedle, `${postNeedle}const __path=await p(ctx);const __extended=await handleExtendedPOST(__path,request);if(__extended)return __extended;const __details=await handleExtendedDetailsPOST(__path,request);if(__details)return __details;`);
   }
 
   await mkdir(dirname(destination), { recursive: true });
