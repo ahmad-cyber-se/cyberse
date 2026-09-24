@@ -6,6 +6,7 @@ const recovered = [
   ['migration_payload/CyberSEApp.tsx.gz.b64', 'components/CyberSEApp.tsx'],
   ['migration_payload/portal-route.ts.gz.b64', 'app/api/portal/[...path]/route.ts'],
   ['migration_payload/globals.css.gz.b64', 'app/globals.css'],
+  ['migration_payload/database-schema.sql.gz.b64', 'database/schema.sql'],
 ];
 
 for (const [source, destination] of recovered) {
