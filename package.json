@@ -2,15 +2,19 @@
   "name": "cyberse-platform",
   "version": "1.0.0",
   "private": true,
+  "engines": {
+    "node": ">=22 <25"
+  },
   "scripts": {
-    "dev": "next dev",
+    "dev": "node scripts/materialize-migration.mjs && next dev",
+    "prebuild": "node scripts/materialize-migration.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "node scripts/materialize-migration.mjs && tsc --noEmit"
   },
   "dependencies": {
-    "@vercel/blob": "^1.1.1",
+    "@vercel/blob": "^2.8.0",
     "bcryptjs": "^3.0.3",
     "jose": "^6.2.2",
     "lucide-react": "^0.468.0",

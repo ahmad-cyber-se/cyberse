@@ -5,6 +5,7 @@ import { audit } from '@/lib/audit';
 import { badRequest, created, notFound, ok, serverError } from '@/lib/http';
 import { sha256, requestContext } from '@/lib/security';
 import { storePrivateFile } from '@/lib/storage';
+import { handlePublicExtendedPOST } from '@/lib/publicExtended';
 
 export const runtime='nodejs';
 type Params={params:Promise<{path:string[]}>};
@@ -46,6 +47,7 @@ export async function GET(request:NextRequest,ctx:Params){
 export async function POST(request:NextRequest,ctx:Params){
   try{
     const path=await p(ctx);
+    const extended=await handlePublicExtendedPOST(path,request); if(extended) return extended;
     if(path==='inquiries'){
       const body=z.object({fullName:z.string().min(2).max(120),workEmail:z.string().email().max(254),phone:z.string().max(40).optional().nullable(),companyName:z.string().max(160).optional().nullable(),jobTitle:z.string().max(120).optional().nullable(),countryCode:z.string().length(2).optional().nullable(),serviceCode:z.string().max(40).optional().nullable(),budgetBand:z.string().max(80).optional().nullable(),timeline:z.string().max(120).optional().nullable(),message:z.string().min(10).max(6000),consentPrivacy:z.literal(true),consentMarketing:z.boolean().optional().default(false)}).parse(await request.json());
       await publicRateLimit(request,'inquiry',body.workEmail,5,30);
