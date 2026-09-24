@@ -10,7 +10,15 @@ const recovered = [
 
 for (const [source, destination] of recovered) {
   const encoded = (await readFile(source, 'utf8')).trim();
-  const content = gunzipSync(Buffer.from(encoded, 'base64'));
+  let content = gunzipSync(Buffer.from(encoded, 'base64')).toString('utf8');
+
+  if (destination === 'app/api/portal/[...path]/route.ts') {
+    content = content.replace(
+      "if(!process.env.BLOB_READ_WRITE_TOKEN)warnings.push('Vercel Blob is not configured; file uploads remain disabled.');",
+      ''
+    );
+  }
+
   await mkdir(dirname(destination), { recursive: true });
   await writeFile(destination, content);
   console.log(`Recovered ${destination}`);
