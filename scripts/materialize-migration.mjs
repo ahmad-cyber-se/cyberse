@@ -18,6 +18,17 @@ for (const [source, destination] of recovered) {
       .replace('React.useEffect(load,[kind]);', 'React.useEffect(()=>{void load()},[kind]);');
   }
 
+  if (destination === 'app/api/portal/[...path]/route.ts') {
+    const getNeedle = 'export async function GET(request:NextRequest,ctx:Params){try{';
+    const postNeedle = 'export async function POST(request:NextRequest,ctx:Params){try{';
+    if (!content.includes(getNeedle) || !content.includes(postNeedle)) {
+      throw new Error('Recovered portal route shape changed; compatibility hooks could not be installed safely');
+    }
+    content = `import { handleExtendedGET, handleExtendedPOST } from '@/lib/portalExtended';\n${content}`
+      .replace(getNeedle, `${getNeedle}const __path=await p(ctx);const __extended=await handleExtendedGET(__path,request);if(__extended)return __extended;`)
+      .replace(postNeedle, `${postNeedle}const __path=await p(ctx);const __extended=await handleExtendedPOST(__path,request);if(__extended)return __extended;`);
+  }
+
   await mkdir(dirname(destination), { recursive: true });
   await writeFile(destination, content);
   console.log(`Recovered ${destination}`);
