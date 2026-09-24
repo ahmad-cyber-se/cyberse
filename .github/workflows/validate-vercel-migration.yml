@@ -46,6 +46,8 @@ jobs:
           grep -oE "path===['\"][^'\"]+['\"]" app/api/portal/'[...path]'/route.ts | sort -u || true
           echo "Migrated UI live-transport references:"
           grep -niE "realtime|presence|push|engagement-messages|messages" components/CyberSEApp.tsx | head -80 || true
+          echo "Migrated UI route/module references:"
+          grep -oE "(/portal/[A-Za-z0-9._?=/:-]+|/services/[A-Za-z0-9._?=/:-]+|/careers/[A-Za-z0-9._?=/:-]+|/insights/[A-Za-z0-9._?=/:-]+|/case-studies[A-Za-z0-9._?=/:-]*)" components/CyberSEApp.tsx | sort -u || true
       - name: Typecheck
         run: npm run typecheck
       - name: Production build
